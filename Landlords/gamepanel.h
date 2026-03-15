@@ -17,7 +17,10 @@ public:
     GamePanel(QWidget *parent = nullptr);
     ~GamePanel();
 
+protected:
+    void paintEvent(QPaintEvent* ev);
 private:
     Ui::GamePanel *ui;
+    QPixmap m_bkImage;
 };
 #endif // GAMEPANEL_H

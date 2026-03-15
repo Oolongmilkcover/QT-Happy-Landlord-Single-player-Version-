@@ -1,15 +1,106 @@
 #ifndef PLAYER_H
 #define PLAYER_H
-
+#include"cards.h"
 #include <QObject>
 
 class Player : public QObject
 {
     Q_OBJECT
 public:
+    enum Role{
+        Lord,
+        Farmer
+    };
+    enum Sex{
+        Man,
+        Woman
+    };
+    enum Direction{
+        Left,
+        Right
+    };
+    enum Type{
+        Robot,
+        User,
+        UnKnow
+    };
     explicit Player(QObject *parent = nullptr);
+    explicit Player(QString name , QObject *parent = nullptr);
+
+    //ID
+    void setName(QString name);
+    QString getName();
+
+    //Role
+    void setRole(Role role);
+    Role getRole();
+
+    //Sex
+    void setSex(Sex sex);
+    Sex getSex();
+
+    //Direction
+    void setDirection (Direction direction);
+    Direction getDirection();
+
+    //Type
+    void setType(Type type);
+    Type getType();
+
+    //Score
+    void setScore(int score);
+    int getScore();
+
+    //isWin
+    void setWin(bool flag);
+    bool getWin();
+
+    //提供当前对象的上家和下家
+    void setPrevPlayer(Player* player);
+    void setNextPlayer(Player* player);
+    Player* getPrevPlayer();
+    Player* getNextPlayer();
+
+    //叫地主/抢地主
+    void grabLordBet(int point);
+
+    //储存扑克牌（发牌的时候得到的)
+    void storeDispatchCard(Card& card);
+    void storeDispatchCard(Cards& cards);
+
+    //得到所有的拍
+    Cards getCards();
+
+    //清空玩家所有的牌
+    void clearCards();
+
+    //出牌
+    void playHand(Cards& cards);
+
+    //设置出牌的玩家以及待处理的扑克牌
+    void setPendingInfo(Player* player,Cards& cards);
+    Player* getPendPlayer();
+    Cards getPendCards();
+
+    //虚函数
+    virtual void prepareCallLord();
+    virtual void preparePlayHand();
 
 signals:
+
+protected:
+    QString m_name;
+    Role m_role;
+    Sex m_sex;
+    Type m_type;
+    Direction m_direction;
+    int m_score;
+    bool m_isWin;
+    Player* m_prev;
+    Player* m_next;
+    Cards m_cards;
+    Cards m_pendCards;
+    Player* m_pendPlayer;
 };
 
 #endif // PLAYER_H
