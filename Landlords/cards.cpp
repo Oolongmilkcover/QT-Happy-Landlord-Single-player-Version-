@@ -4,6 +4,11 @@
 
 Cards::Cards() {}
 
+Cards::Cards(const Card &card)
+{
+    add(card);
+}
+
 void Cards::add(const Card &card)
 {
     m_cards.insert(card);
@@ -100,12 +105,10 @@ Card Cards::takeRandCard()
 {
     //生成随机数
     int num = QRandomGenerator::global()->bounded(m_cards.size());
-    QSet<Card>::const_iterator it = m_cards.constBegin();
-    Card card ;
-    for(int i = 0; i<num;i++,it++){
-        card = *it;
-        m_cards.erase(it);
-    }
+    QSet<Card>::iterator it = m_cards.begin();
+    std::advance(it, num);
+    Card card = *it;
+    m_cards.erase(it);
     return card;
 }
 

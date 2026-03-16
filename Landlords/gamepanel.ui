@@ -32,7 +32,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="scorepanel" name="scorePanel" native="true"/>
+        <widget class="ScorePanel" name="scorePanel" native="true"/>
        </item>
       </layout>
      </widget>
@@ -85,15 +85,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>scorepanel</class>
-   <extends>QWidget</extends>
-   <header>scorepanel.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonGroup</class>
    <extends>QWidget</extends>
    <header>buttongroup.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScorePanel</class>
+   <extends>QWidget</extends>
+   <header>scorepanel.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

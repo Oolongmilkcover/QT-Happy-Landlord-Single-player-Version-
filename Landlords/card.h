@@ -84,7 +84,13 @@ inline Card::CardSuit operator++(Card::CardSuit& s, int) {
     return temp;
 }
 
-
+inline bool operator<(const Card& lhs, const Card& rhs) {
+    // 先比较点数，点数相同再比较花色
+    if (lhs.point() != rhs.point()) {
+        return lhs.point() < rhs.point();
+    }
+    return lhs.suit() < rhs.suit();
+}
 
 
 #endif // CARD_H

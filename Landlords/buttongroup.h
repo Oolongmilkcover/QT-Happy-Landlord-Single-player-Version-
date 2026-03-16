@@ -1,6 +1,6 @@
 #ifndef BUTTONGROUP_H
 #define BUTTONGROUP_H
-
+#include"mybutton.h"
 #include <QWidget>
 
 namespace Ui {
@@ -25,7 +25,7 @@ public:
     void initButtons();
 
     //处理page页的切换
-    void selectPanel(Panel type);
+    void selectPanel(Panel type,int bet=0);
 
 signals:
     //开始游戏

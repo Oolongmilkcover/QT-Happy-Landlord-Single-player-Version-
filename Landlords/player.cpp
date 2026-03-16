@@ -3,11 +3,12 @@
 Player::Player(QObject *parent)
     : QObject{parent}
 {
-
+    m_score = 0;
+    m_isWin = false;
 }
 
 Player::Player(QString name, QObject *parent)
-    : QObject{parent}
+    : Player(parent)
 {
     m_name = name;
 }
@@ -80,6 +81,11 @@ Player *Player::getPrevPlayer()
 Player *Player::getNextPlayer()
 {
     return m_next;
+}
+
+void Player::grabLordBet(int point)
+{
+    emit notifyGrabLordBet(this,point);
 }
 
 void Player::storeDispatchCard(Card &card)

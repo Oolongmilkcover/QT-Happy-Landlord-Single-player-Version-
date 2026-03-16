@@ -87,7 +87,8 @@ public:
     virtual void preparePlayHand();
 
 signals:
-
+    //通过已经叫地主下注
+    void notifyGrabLordBet(Player* player,int bet);
 protected:
     QString m_name;
     Role m_role;

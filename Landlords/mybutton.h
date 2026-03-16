@@ -23,7 +23,6 @@ protected:
     void paintEvent(QPaintEvent* ev);
 
 signals:
-
 private:
     QString m_normal;
     QString m_hover;

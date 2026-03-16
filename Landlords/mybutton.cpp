@@ -1,5 +1,6 @@
 #include "mybutton.h"
 
+#include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 
@@ -33,6 +34,7 @@ void MyButton::mouseReleaseEvent(QMouseEvent *ev)
         m_pixmap.load(m_normal);
         update();
     }
+    QPushButton::mouseReleaseEvent(ev);
 }
 
 void MyButton::enterEvent(QEvent *ev)
