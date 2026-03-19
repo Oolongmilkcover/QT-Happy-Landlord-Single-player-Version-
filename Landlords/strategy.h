@@ -52,8 +52,6 @@ private:
     Cards getBaseSeqPair (Card::CardPoint point);
     Cards getBaseSeqSingle (Card::CardPoint point);
     QVector<Cards> getBomb(Card::CardPoint begin);
-    void calcTeammateAndEnemyCount(int &teammateCount, int &enemyCount);
-    bool isOnlyCanBeat(Cards &cs);
 
 private:
 

@@ -2,7 +2,6 @@
 #define PLAYER_H
 #include"cards.h"
 #include <QObject>
-
 class Player : public QObject
 {
     Q_OBJECT
@@ -81,14 +80,26 @@ public:
     void setPendingInfo(Player* player,Cards& cards);
     Player* getPendPlayer();
     Cards getPendCards();
+    void setPendPlayer(Player* player);
 
     //虚函数
     virtual void prepareCallLord();
     virtual void preparePlayHand();
+    virtual void thinkCallLord();  //考虑叫地主
+    virtual void thinkPlayHand();
+
+    //存储出牌玩家对象和打出的牌
+    void storePendingInfo(Player* player , Cards&cards);
 
 signals:
     //通过已经叫地主下注
     void notifyGrabLordBet(Player* player,int bet);
+    //通知已经出牌
+    void notifyPlayHand(Player* player,Cards& cards);
+    //通知已经发牌了
+    void notifyPickCards(Player* player,Cards& cards);
+
+
 protected:
     QString m_name;
     Role m_role;

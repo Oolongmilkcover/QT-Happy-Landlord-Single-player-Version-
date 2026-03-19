@@ -66,15 +66,15 @@ void ButtonGroup::selectPanel(Panel type,int bet)
     }
     if(bet==0){
         ui->oneScore->setVisible(true);
-        ui->oneScore->setVisible(true);
-        ui->oneScore->setVisible(true);
+        ui->twoScore->setVisible(true);
+        ui->threeScore->setVisible(true);
     }else if(bet == 1){
         ui->oneScore->setVisible(false);
-        ui->oneScore->setVisible(true);
-        ui->oneScore->setVisible(true);
+        ui->twoScore->setVisible(true);
+        ui->threeScore->setVisible(true);
     }else if(bet == 2){
         ui->oneScore->setVisible(false);
-        ui->oneScore->setVisible(false);
-        ui->oneScore->setVisible(true);
+        ui->twoScore->setVisible(false);
+        ui->threeScore->setVisible(true);
     }
 }

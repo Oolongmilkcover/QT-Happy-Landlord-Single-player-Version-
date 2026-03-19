@@ -2,6 +2,7 @@
 #define CARDS_H
 #include<QSet>
 #include"card.h"
+#include <QMetaType>
 class Cards
 {
 public:
@@ -15,6 +16,7 @@ public:
     //添加扑克牌
     void add(const Card& card);
     void add(const Cards& cards);
+    void add(const QVector<Cards>& cards);
 
     //一次性插入多个数据(重载<<)
     Cards& operator<<(const Card& card);
@@ -54,5 +56,5 @@ private:
     QSet<Card> m_cards;
 
 };
-
+Q_DECLARE_METATYPE(Cards)
 #endif // CARDS_H

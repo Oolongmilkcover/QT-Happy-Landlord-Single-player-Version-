@@ -1,4 +1,6 @@
 #include "player.h"
+#include<QMetaMethod>
+#include <QDebug>
 
 Player::Player(QObject *parent)
     : QObject{parent}
@@ -91,11 +93,15 @@ void Player::grabLordBet(int point)
 void Player::storeDispatchCard(Card &card)
 {
     m_cards.add(card);
+    Cards  cs ;
+    cs.add(card);
+    emit notifyPickCards(this,cs);
 }
 
 void Player::storeDispatchCard(Cards &cards)
 {
     m_cards.add(cards);
+    emit notifyPickCards(this,cards);
 }
 
 Cards Player::getCards()
@@ -111,13 +117,22 @@ void Player::clearCards()
 void Player::playHand(Cards &cards)
 {
     m_cards.remove(cards);
+    emit notifyPlayHand(this,cards);
 }
+
+
 
 void Player::setPendingInfo(Player *player, Cards &cards)
 {
     m_pendPlayer = player;
     m_pendCards = cards;
 }
+
+void Player::setPendPlayer(Player* player)
+{
+    m_pendPlayer = player;
+}
+
 
 Player *Player::getPendPlayer()
 {
@@ -137,6 +152,22 @@ void Player::prepareCallLord()
 void Player::preparePlayHand()
 {
 
+}
+
+void Player::thinkCallLord()
+{
+
+}
+
+void Player::thinkPlayHand()
+{
+
+}
+
+void Player::storePendingInfo(Player *player, Cards &cards)
+{
+    m_pendPlayer = player;
+    m_pendCards = cards;
 }
 
 Player::Type Player::getType()

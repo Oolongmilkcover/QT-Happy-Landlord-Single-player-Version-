@@ -16,10 +16,13 @@ msvc {
 
 
 SOURCES += \
+    animationwindow.cpp \
     buttongroup.cpp \
     card.cpp \
     cardpanel.cpp \
     cards.cpp \
+    countdown.cpp \
+    endingpanel.cpp \
     gamecontrol.cpp \
     main.cpp \
     gamepanel.cpp \
@@ -27,21 +30,28 @@ SOURCES += \
     player.cpp \
     playhand.cpp \
     robot.cpp \
+    robotgraplord.cpp \
+    robotplayhand.cpp \
     scorepanel.cpp \
     strategy.cpp \
     userplayer.cpp
 
 HEADERS += \
+    animationwindow.h \
     buttongroup.h \
     card.h \
     cardpanel.h \
     cards.h \
+    countdown.h \
+    endingpanel.h \
     gamecontrol.h \
     gamepanel.h \
     mybutton.h \
     player.h \
     playhand.h \
     robot.h \
+    robotgraplord.h \
+    robotplayhand.h \
     scorepanel.h \
     strategy.h \
     userplayer.h

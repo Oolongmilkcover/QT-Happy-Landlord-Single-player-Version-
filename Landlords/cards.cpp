@@ -19,6 +19,14 @@ void Cards::add(const Cards &cards)
     m_cards.unite(cards.m_cards);
 }
 
+void Cards::add(const QVector<Cards> &cards)
+{
+    for(int i=0; i<cards.count(); ++i)
+    {
+        add(cards.at(i));
+    }
+}
+
 Cards &Cards::operator<<( const Card &card)
 {
     add(card);

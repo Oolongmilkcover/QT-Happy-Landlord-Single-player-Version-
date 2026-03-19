@@ -4,6 +4,7 @@
 #include"userplayer.h"
 #include"cards.h"
 #include <QObject>
+#include<player.h>
 struct BetRecord{
     BetRecord(){
         reset();
@@ -65,7 +66,7 @@ public:
     //准备叫地主
     void startLordCard();
     //成为地主
-    void becomeLord(Player* player);
+    void becomeLord(Player* player,int bet);
 
     //清空所有玩家的得分
     void clearPlayerScore();
@@ -77,12 +78,18 @@ public:
     void onGrabBet(Player* player,int bet);
 
     //处理出牌
+    void onPlayerHand(Player* player ,  Cards& cards);
+
 signals:
     void playerStatusChanged(Player* player,PlayerStatus status);
     //通知玩家抢地主了
     void notifyGrabLordBet(Player* player , int bet,bool flag);
     //游戏状态变化
     void gameStatusChanged(GameStatus status);
+    //通知玩家出牌了
+    void notifyPlayHand(Player* player,Cards&cards);
+    //给其他玩家传递出牌数据
+    void pendingInfo(Player* player,Cards&cards);
 
 private:
     Robot* m_robotLeft;
@@ -93,6 +100,7 @@ private:
     Player* m_pendPlayer;
     Cards m_allCards;
     BetRecord m_betRecord;
+    int m_curBet;
 };
 
 #endif // GAMECONTROL_H

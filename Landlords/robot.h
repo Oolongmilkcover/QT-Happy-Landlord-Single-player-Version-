@@ -12,6 +12,8 @@ public:
     explicit Robot(QObject *parent = nullptr);
     void prepareCallLord() override;
     void preparePlayHand() override;
+    void thinkCallLord() override;
+    void thinkPlayHand() override;
 };
 
 #endif // ROBOT_H

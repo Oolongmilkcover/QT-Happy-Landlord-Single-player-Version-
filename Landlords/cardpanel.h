@@ -31,10 +31,14 @@ public:
     void setOwner(Player* player);
     Player* getOwner();
 
+    //模拟扑克牌的点击事件
+    void clicked();
+
 protected:
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent* event);
 signals:
+    void cardSelected(Qt::MouseButton buttton);
 private:
     QPixmap m_front;
     QPixmap m_back;

@@ -12,6 +12,9 @@ public:
     explicit UserPlayer(QObject *parent = nullptr);
     void prepareCallLord() override;
     void preparePlayHand() override;
+
+signals:
+    void startCountDown();
 };
 
 #endif // USERPLAYER_H

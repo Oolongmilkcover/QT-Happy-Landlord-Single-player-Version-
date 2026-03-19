@@ -12,23 +12,30 @@ Strategy::Strategy(Player *player, const Cards &cards)
 
 Cards Strategy::makeStrategy()
 {
-    //得出出牌玩家对象以及打出的牌
+    // 得到出牌玩家对象以及打出的牌
     Player* pendPlayer = m_player->getPendPlayer();
     Cards pendCards = m_player->getPendCards();
-    //判断上次出牌的玩家是不是自己
-    if(pendPlayer == m_player || pendPlayer == nullptr){
-        //直接出牌
-        //如果是自己，出牌没限制
+
+    // 判断上次出牌的玩家是不是我自己
+    if(pendPlayer == m_player || pendPlayer == nullptr)
+    {
+        // 直接出牌
+        // 如果是我自己, 出牌没有限制
         return firstPlay();
-    }else{
-        //如果不是自己需要找比出牌玩家点数大的牌
+    }
+    else
+    {
+        // 如果不是我自己需要找比出牌玩家点数大的牌
         PlayHand type(pendCards);
         Cards beatCards = getGreaterCards(type);
-        //找到了点数大的牌考虑是否出牌
+        // 找到了点数大的牌需要考虑是否出牌
         bool shouldBeat = whetherToBeat(beatCards);
-        if(shouldBeat){
+        if(shouldBeat)
+        {
             return beatCards;
-        }else{
+        }
+        else
+        {
             return Cards();
         }
     }
@@ -37,304 +44,302 @@ Cards Strategy::makeStrategy()
 
 Cards Strategy::firstPlay()
 {
-    //当前玩家只剩下单一的牌型
+    // 判断玩家手中是否只剩单一的牌型
     PlayHand hand(m_cards);
-    if(hand.getHandType()!=PlayHand::Hand_Unknown){
+    if(hand.getHandType() != PlayHand::Hand_Unknown)
+    {
         return m_cards;
     }
-    //不是单一的牌型
-    //当前玩家手里有没有顺子
+    // 不是单一牌型
+    // 判断玩家手中是否有顺子
     QVector<Cards> optimalSeq = pickOptimalSeqSingles();
-    if(!optimalSeq.isEmpty()){
-        //得到单牌的数量
+    if(!optimalSeq.isEmpty())
+    {
+        // 得到单牌的数量
         int baseNum = findCardsByCount(1).size();
-        //把得到的顺子的集合从玩家手中删除
+        // 把得到的顺子的集合从玩家手中删除
         Cards save = m_cards;
         save.remove(optimalSeq);
-        int lastNum = Strategy(m_player,save).findCardsByCount(1).size();
-        if(baseNum > lastNum){
+        int lastNum = Strategy(m_player, save).findCardsByCount(1).size();
+        if(baseNum > lastNum)
+        {
             return optimalSeq[0];
         }
     }
-    bool hasPlane,hasTriple,hasPair;
-    hasPlane = hasTriple = hasPair = false;
+
+    bool hasPlane, hasTriple, hasPair;
+    hasPair = hasTriple = hasPlane = false;
     Cards backup = m_cards;
-    //有没有炸弹
-    QVector<Cards> bombArray = findCardType(PlayHand(PlayHand::Hand_Bomb,Card::Card_Begin,0),false);
+
+    // 有没有炸弹
+    QVector<Cards> bombArray = findCardType(PlayHand(PlayHand::Hand_Bomb, Card::Card_Begin, 0), false);
     backup.remove(bombArray);
-    //有没有飞机
-    QVector<Cards> PlaneArray = Strategy(m_player,backup).findCardType(PlayHand(PlayHand::Hand_Plane,Card::Card_Begin,0),false);
-    if(!PlaneArray.isEmpty()){
-        hasTriple = true;
-        backup.remove(PlaneArray);
+
+    // 有没有飞机
+    QVector<Cards> planeArray = Strategy(m_player, backup).findCardType(PlayHand(PlayHand::Hand_Plane, Card::Card_Begin, 0), false);
+    if(!planeArray.isEmpty())
+    {
+        hasPlane = true;
+        backup.remove(planeArray);
     }
-    //有没有三张点相同的牌
-    QVector<Cards> TripleArray = Strategy(m_player,backup).findCardType(PlayHand(PlayHand::Hand_Triple,Card::Card_Begin,0),false);
-    if(!TripleArray.isEmpty()){
+
+    // 有没有三张点数相同的牌
+    QVector<Cards> seqTripleArray = Strategy(m_player, backup).findCardType(PlayHand(PlayHand::Hand_Triple, Card::Card_Begin, 0), false);
+    if(!seqTripleArray.isEmpty())
+    {
         hasTriple = true;
-        backup.remove(TripleArray);
+        backup.remove(seqTripleArray);
     }
-    //有没有连对
-    QVector<Cards> seqPairArray = Strategy(m_player,backup).findCardType(PlayHand(PlayHand::Hand_Seq_Pair,Card::Card_Begin,0),false);
-    if(!seqPairArray.isEmpty()){
+
+    // 有没有连对
+    QVector<Cards> seqPairArray = Strategy(m_player, backup).findCardType(PlayHand(PlayHand::Hand_Seq_Pair, Card::Card_Begin, 0), false);
+    if(!seqPairArray.isEmpty())
+    {
         hasPair = true;
         backup.remove(seqPairArray);
     }
-    if(hasPair){
+
+    if(hasPair)
+    {
         Cards maxPair;
-        for(int i = 0;i<seqPairArray.size();i++){
-            if(seqPairArray[i].cardCount()>maxPair.cardCount()){
+        for(int i=0; i<seqPairArray.size(); ++i)
+        {
+            if(seqPairArray[i].cardCount() > maxPair.cardCount())
+            {
                 maxPair = seqPairArray[i];
             }
         }
         return maxPair;
     }
-    if(hasPlane){
-        //1.飞机两对
+
+    if(hasPlane)
+    {
+        // 1. 飞机带两个对儿
         bool twoPairFond = false;
         QVector<Cards> pairArray;
-        for(auto point = Card::Card_3;point<=Card::Card_10;point++){
-            Cards pair = Strategy(m_player,backup).findSamePointcards(point,2);
-            if(!pair.isEmpty()){
+        for(Card::CardPoint point = Card::Card_3; point <= Card::Card_10; point = Card::CardPoint(point + 1))
+        {
+            Cards pair = Strategy(m_player, backup).findSamePointcards(point, 2);
+            if(!pair.isEmpty())
+            {
                 pairArray.push_back(pair);
-                if(pairArray.size()==2){
+                if(pairArray.size() == 2)
+                {
                     twoPairFond = true;
                     break;
                 }
             }
         }
-        if(twoPairFond){
-            Cards tmp = PlaneArray[0];
-            tmp<<pairArray[0]<<pairArray[1];
+        if(twoPairFond)
+        {
+            Cards tmp = planeArray[0];
+            tmp.add(pairArray);
             return tmp;
-        }else{
-            //2.飞机带两个单
+        }
+        // 2. 飞机带两个单牌
+        else
+        {
             bool twoSingleFond = false;
-            QVector<Cards> SingleArray;
-            for(auto point = Card::Card_3;point<=Card::Card_10;point++){
-                if(backup.pointCount(point)==1){
-                    Cards Single = Strategy(m_player,backup).findSamePointcards(point,1);
-                    if(!Single.isEmpty()){
-                        SingleArray.push_back(Single);
-                        if(SingleArray.size()==2){
+            QVector<Cards> singleArray;
+            for(Card::CardPoint point = Card::Card_3; point <= Card::Card_10; point = Card::CardPoint(point + 1))
+            {
+                if(backup.pointCount(point) == 1)
+                {
+                    Cards single = Strategy(m_player, backup).findSamePointcards(point, 1);
+                    if(!single.isEmpty())
+                    {
+                        singleArray.push_back(single);
+                        if(singleArray.size() == 2)
+                        {
                             twoSingleFond = true;
                             break;
                         }
                     }
                 }
             }
-            if(twoSingleFond){
-                Cards tmp = PlaneArray[0];
-                tmp<<SingleArray[0]<<SingleArray[1];
+            if(twoSingleFond)
+            {
+                Cards tmp = planeArray[0];
+                tmp.add(singleArray);
                 return tmp;
-            }else{
-                //3.飞机
-                return PlaneArray[0];
+            }
+            else
+            {
+                // 3. 飞机
+                return planeArray[0];
             }
         }
     }
-    if(hasTriple){
-        if(PlayHand(TripleArray[0]).getCardPoint()<Card::Card_A){
-            for(auto point = Card::Card_3;point<=Card::Card_A;point++){
+
+    if(hasTriple)
+    {
+        if(PlayHand(seqTripleArray[0]).getCardPoint() < Card::Card_A)
+        {
+            for(Card::CardPoint point = Card::Card_3; point <= Card::Card_A; point = Card::CardPoint(point+1))
+            {
                 int pointCount = backup.pointCount(point);
-                if(pointCount==1){
-                    Cards single = Strategy(m_player,backup).findSamePointcards(point,1);
-                    Cards tmp = TripleArray[0];
+                if(pointCount == 1)
+                {
+                    Cards single = Strategy(m_player, backup).findSamePointcards(point, 1);
+                    Cards tmp = seqTripleArray[0];
                     tmp.add(single);
                     return tmp;
-                }else if(pointCount == 2){
-                    Cards pair = Strategy(m_player,backup).findSamePointcards(point,2);
-                    Cards tmp = TripleArray[0];
+                }
+                else if(pointCount == 2)
+                {
+                    Cards pair = Strategy(m_player, backup).findSamePointcards(point, 2);
+                    Cards tmp = seqTripleArray[0];
                     tmp.add(pair);
                     return tmp;
                 }
             }
         }
-        //不带副牌
-        return TripleArray[0];
+        // 不带副牌
+        return seqTripleArray[0];
     }
-    //单牌或者对牌
+    // 单牌或者对儿牌
     Player* nextPlayer = m_player->getNextPlayer();
-    if(nextPlayer->getCards().cardCount()==1&&m_player->getRole()!=nextPlayer->getRole()){
-        for(Card::CardPoint point = Card::Card_BJ; point >= Card::Card_3; point = static_cast<Card::CardPoint>(point - 1)){
+    if(nextPlayer->getCards().cardCount() == 1 && m_player->getRole() != nextPlayer->getRole())
+    {
+        for(Card::CardPoint point = Card::CardPoint(Card::Card_End-1);
+             point >= Card::Card_3; point = Card::CardPoint(point-1))
+        {
             int pointCount = backup.pointCount(point);
-            if(pointCount==1){
-                Cards single = Strategy(m_player,backup).findSamePointcards(point,1);
+            if(pointCount == 1)
+            {
+                Cards single = Strategy(m_player, backup).findSamePointcards(point, 1);
                 return single;
-            }else if(pointCount==2){
-                Cards pair = Strategy(m_player,backup).findSamePointcards(point,2);
-                return pair;
             }
-        }
-    }else{
-        for(auto point = Card::Card_3;point<Card::Card_End;point++){
-            int pointCount = backup.pointCount(point);
-            if(pointCount==1){
-                Cards single = Strategy(m_player,backup).findSamePointcards(point,1);
-                return single;
-            }else if(pointCount==2){
-                Cards pair = Strategy(m_player,backup).findSamePointcards(point,2);
+            else if(pointCount == 2)
+            {
+                Cards pair = Strategy(m_player, backup).findSamePointcards(point, 2);
                 return pair;
             }
         }
     }
-    return  Cards();
+    else
+    {
+        for(Card::CardPoint point =  Card::Card_3;
+             point < Card::Card_End; point = Card::CardPoint(point+1))
+        {
+            int pointCount = backup.pointCount(point);
+            if(pointCount == 1)
+            {
+                Cards single = Strategy(m_player, backup).findSamePointcards(point, 1);
+                return single;
+            }
+            else if(pointCount == 2)
+            {
+                Cards pair = Strategy(m_player, backup).findSamePointcards(point, 2);
+                return pair;
+            }
+        }
+    }
+    return Cards();
 }
 
 Cards Strategy::getGreaterCards(PlayHand type)
 {
-    //1.出牌玩家和当前玩家不是一伙的
+    //1. 出牌玩家和当前玩家不是一伙的
     Player* pendPlayer = m_player->getPendPlayer();
-    if(pendPlayer->getRole()!=m_player->getRole()&&pendPlayer->getCards().cardCount()<=3){
+    if(pendPlayer != nullptr && pendPlayer->getRole() != m_player->getRole() && pendPlayer->getCards().cardCount() <= 3)
+    {
         QVector<Cards> bombs = findCardsByCount(4);
-        for(int i = 0;i<bombs.size();i++){
-            if(PlayHand(bombs[i]).canBeat(type)){
+        for(int i=0; i<bombs.size(); ++i)
+        {
+            if(PlayHand(bombs[i]).canBeat(type))
+            {
                 return bombs[i];
             }
         }
-        //搜索有没有王炸
-        Cards sj = findSamePointcards(Card::Card_SJ,1);
-        Cards bj = findSamePointcards(Card::Card_BJ,1);
-        if(!sj.isEmpty()&&!bj.isEmpty()){
+        // 搜索当前玩家手中有没有王炸
+        Cards sj = findSamePointcards(Card::Card_SJ, 1);
+        Cards bj = findSamePointcards(Card::Card_BJ, 1);
+        if(!sj.isEmpty() && !bj.isEmpty())
+        {
             Cards jokers;
-            jokers<<sj<<bj;
+            jokers << sj << bj;
             return jokers;
         }
     }
-    //2.当前玩家和下一个玩家不是一伙的
-    Player* nextPlayer =  m_player->getNextPlayer();
-    //将玩家手中的顺子剔除
+    //2. 当前玩家和下一个玩家不是一伙的
+    Player* nextPlayer = m_player->getNextPlayer();
+    // 将玩家手中的顺子剔除出去
     Cards remain = m_cards;
-    remain.remove(Strategy(m_player,remain).pickOptimalSeqSingles());
+    remain.remove(Strategy(m_player, remain).pickOptimalSeqSingles());
 
-    auto beatcard = std::bind([=](Cards& cards){
-        QVector<Cards> beatCardsArray = Strategy(m_player,cards).findCardType(type,true);
-        if(!beatCardsArray.isEmpty()){
-            if(m_player->getRole()!=nextPlayer->getRole() && nextPlayer->getCards().cardCount()<=2){
+
+    auto beatCard = std::bind([=](const Cards & cards){
+        QVector<Cards> beatCardsArray = Strategy(m_player, cards).findCardType(type, true);
+        if(!beatCardsArray.isEmpty())
+        {
+            if(m_player->getRole() != nextPlayer->getRole() && nextPlayer->getCards().cardCount() <= 2)
+            {
                 return beatCardsArray.back();
-            }else{
+            }
+            else
+            {
                 return beatCardsArray.front();
             }
         }
         return Cards();
-    },std::placeholders::_1);
+    }, std::placeholders::_1);
 
     Cards cs;
-    if(!(cs = beatcard(remain)).isEmpty()){
+    if(!(cs = beatCard(remain)).isEmpty())
+    {
         return cs;
-    }else{
-        if(!(cs = beatcard(m_cards)).isEmpty()) return cs;
+    }
+    else
+    {
+        if(!(cs = beatCard(m_cards)).isEmpty()) return cs;
     }
     return Cards();
 }
 
 bool Strategy::whetherToBeat(Cards &cs)
 {
-    //豆脑的算法
-    if(cs.isEmpty()) return false;
-
-    // ========== 1. 基础上下文获取 ==========
+    // 没有找到能够击败对方的牌
+    if(cs.isEmpty())
+    {
+        return false;
+    }
+    // 得到出牌玩家的对象
     Player* pendPlayer = m_player->getPendPlayer();
-    if (!pendPlayer) return false; // 防御性检查
+    if(m_player->getRole() == pendPlayer->getRole())
+    {
+        // 手里的牌所剩无几并且是一个完整的牌型
+        Cards left = m_cards;
+        left.remove(cs);
+        if(PlayHand(left).getHandType() != PlayHand::Hand_Unknown)
+        {
+            return true;
+        }
+        // 如果cs对象中的牌的最小点数是2,大小王 --> 不出牌
+        Card::CardPoint basePoint = PlayHand(cs).getCardPoint();
+        if(basePoint == Card::Card_2 || basePoint == Card::Card_SJ || basePoint == Card::Card_BJ)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        PlayHand myHand(cs);
+        // 如果是三个2带一,或者带一对, 不出牌(保存实力)
+        if((myHand.getHandType() == PlayHand::Hand_Triple_Single || myHand.getHandType() == PlayHand::Hand_Triple_Pair)
+            && myHand.getCardPoint() == Card::Card_2)
+        {
+            return false;
+        }
 
-    Player::Role myRole = m_player->getRole();
-    Player::Role pendRole = pendPlayer->getRole();
-    int myCardCount = m_cards.cardCount();
-    int pendCardCount = pendPlayer->getCards().cardCount();
-    Cards leftCards = m_cards;
-    leftCards.remove(cs);
-    int leftCount = leftCards.cardCount();
-    PlayHand csHand(cs);
-    PlayHand leftHand(leftCards);
-    Card::CardPoint csPoint = csHand.getCardPoint();
-
-    // ========== 2. 绝对不出牌的场景（优先级最高） ==========
-    // 2.1 拟出牌是2/大小王（核心牌，非关键局不轻易出）
-    if (csPoint == Card::Card_2 || csPoint == Card::Card_SJ || csPoint == Card::Card_BJ) {
-        // 例外：自己只剩1-2张牌时，用核心牌冲刺
-        if (myCardCount <= 2) return true;
-        return false;
+        // 如果cs是对2, 并且出牌玩家手中的牌数量大于等于10 && 自己的牌的数量大于等于5, 暂时放弃出牌
+        if(myHand.getHandType() == PlayHand::Hand_Pair && myHand.getCardPoint() == Card::Card_2
+            && pendPlayer->getCards().cardCount() >= 10 && m_player->getCards().cardCount() >= 5)
+        {
+            return false;
+        }
     }
-
-    // 2.2 三个2带牌/对2（保留核心牌型）
-    if ((csHand.getHandType() == PlayHand::Hand_Triple_Single ||
-         csHand.getHandType() == PlayHand::Hand_Triple_Pair) &&
-        csPoint == Card::Card_2) {
-        return false;
-    }
-    if (csHand.getHandType() == PlayHand::Hand_Pair &&
-        csPoint == Card::Card_2 &&
-        pendCardCount >= 10 &&
-        myCardCount >= 5) {
-        return false;
-    }
-
-    // 2.3 出牌后剩余牌型极差（无完整牌型且牌数多）
-    if (leftHand.getHandType() == PlayHand::Hand_Unknown && leftCount > 8) {
-        return false;
-    }
-
-    // ========== 3. 必须出牌的场景 ==========
-    // 3.1 对手是敌人且只剩≤3张牌（防止对手走牌）
-    if (myRole != pendRole && pendCardCount <= 3) {
-        return true;
-    }
-
-    // 3.2 自己出牌后只剩1张牌（冲刺走牌）
-    if (leftCount == 1) {
-        return true;
-    }
-
-    // 3.3 队友出牌且只剩≤2张牌（不抢队友出牌权）
-    if (myRole == pendRole && pendCardCount <= 2) {
-        return false;
-    }
-    // ========== 3.4 新增：地主清场/农民压制逻辑 ==========
-    int teammateCount = 0, enemyCount = 0;
-    calcTeammateAndEnemyCount(teammateCount, enemyCount);
-
-    // 地主：敌人总牌数≤5，必出
-    if (myRole == Player::Lord && enemyCount <= 5) {
-        return true;
-    }
-
-    // 农民：地主牌数>5，且自己是唯一能压制的，必出
-    if (myRole == Player::Farmer && pendRole == Player::Lord &&
-        isOnlyCanBeat(cs) && pendCardCount > 5) {
-        return true;
-    }
-    // ========== 4. 灵活决策 ==========
-    // 4.1 自己牌数少（≤4张）：优先出牌
-    if (myCardCount <= 4) {
-        return true;
-    }
-
-    // 4.2 拟出牌是小牌（3-5）：优先消耗
-    if (csPoint <= Card::Card_5) {
-        return true;
-    }
-
-    // 4.3 出牌后剩余牌型完整：可以出
-    if (leftHand.getHandType() != PlayHand::Hand_Unknown) {
-        return true;
-    }
-
-    // 4.4 兜底：动态概率随机（更像人类决策）
-    // 核心逻辑：牌多→保守（少出牌），牌少→激进（多出牌），中间状态折中
-    int prob;
-    if (myCardCount > 8) {
-        prob = 20; // 手牌多（>8张）：保守，20%概率出牌
-    } else if (myCardCount > 4) {
-        prob = 50; // 手牌中等（5-8张）：折中，50%概率出牌
-    } else {
-        prob = 80; // 手牌少（≤4张）：激进，80%概率出牌
-    }
-    // 额外优化：农民打地主，地主牌少则更激进
-    if (myRole == Player::Farmer && pendRole == Player::Lord && pendCardCount <= 5) {
-        prob = qMin(prob + 20, 90); // 最多90%，避免100%太机械
-    }
-    srand(time(nullptr));
-    return (rand() % 100) < prob;
+    return true;
 }
 
 Cards Strategy::findSamePointcards(Card::CardPoint point, int count)
@@ -729,77 +734,4 @@ QVector<Cards> Strategy::getBomb(Card::CardPoint begin)
     }
     return findcardsArray;
 }
-
-void Strategy::calcTeammateAndEnemyCount(int &teammateCount, int &enemyCount)
-{
-    teammateCount = 0;
-    enemyCount = 0;
-    if (!m_player) return;
-
-    // 遍历上下家（斗地主3人：自己+左+右）
-    Player* prev = m_player->getPrevPlayer();
-    Player* next = m_player->getNextPlayer();
-    Player::Role myRole = m_player->getRole();
-
-    if (prev) {
-        if (prev->getRole() == myRole) {
-            teammateCount += prev->getCards().cardCount();
-        } else {
-            enemyCount += prev->getCards().cardCount();
-        }
-    }
-    if (next) {
-        if (next->getRole() == myRole) {
-            teammateCount += next->getCards().cardCount();
-        } else {
-            enemyCount += next->getCards().cardCount();
-        }
-    }
-}
-
-bool Strategy::isOnlyCanBeat(Cards &cs)
-{
-    // 简化版：农民阵营，检查队友是否有更大的牌
-    if (m_player->getRole() != Player::Farmer) return false;
-
-    Player* teammate = nullptr;
-    Player* prev = m_player->getPrevPlayer();
-    Player* next = m_player->getNextPlayer();
-    if (prev && prev->getRole() == Player::Farmer && prev != m_player) {
-        teammate = prev;
-    } else if (next && next->getRole() == Player::Farmer && next != m_player) {
-        teammate = next;
-    }
-
-    if (!teammate) return true;
-
-    // 检查队友是否有比cs大的牌（复用你的PlayHand逻辑）
-    PlayHand csHand(cs);
-    Cards teammateCards = teammate->getCards();
-    Strategy tmpStrategy(teammate, teammateCards);
-    QVector<Cards> biggerCards = tmpStrategy.findCardType(csHand, true);
-    return biggerCards.isEmpty();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
