@@ -12,7 +12,7 @@ public:
         NoSort
     };
     Cards();
-    Cards(const Card& card);
+    explicit Cards(const Card& card);
     //添加扑克牌
     void add(const Card& card);
     void add(const Cards& cards);
@@ -56,5 +56,5 @@ private:
     QSet<Card> m_cards;
 
 };
-Q_DECLARE_METATYPE(Cards)
+
 #endif // CARDS_H

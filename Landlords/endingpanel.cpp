@@ -12,7 +12,7 @@ EndingPanel::EndingPanel(bool isLord , bool isWin , QWidget *parent)
     if(isLord && isWin){
         m_title->setPixmap(QPixmap(":/images/lord_win.png"));
     }else if(isLord && !isWin){
-        m_title->setPixmap(QPixmap(":/images/lord_win.png"));
+        m_title->setPixmap(QPixmap(":/images/lord_fail.png"));
     }else if(!isLord && isWin){
         m_title->setPixmap(QPixmap(":/images/farmer_win.png"));
     }else if(!isLord && !isWin){
@@ -45,7 +45,7 @@ void EndingPanel::setPlayerScore(int left, int right, int user)
     m_score->setScores(left,right,user);
 }
 
-void EndingPanel::paintEvent(QPaintEvent *ev)
+void EndingPanel::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.drawPixmap(rect(),m_bk);

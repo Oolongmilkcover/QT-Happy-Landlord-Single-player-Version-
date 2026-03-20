@@ -80,6 +80,8 @@ public:
     //处理出牌
     void onPlayerHand(Player* player ,  Cards& cards);
 
+    //下局抢地主的
+    void setNextToBet(Player* player);
 signals:
     void playerStatusChanged(Player* player,PlayerStatus status);
     //通知玩家抢地主了
@@ -92,15 +94,16 @@ signals:
     void pendingInfo(Player* player,Cards&cards);
 
 private:
-    Robot* m_robotLeft;
-    Robot* m_robotRight;
-    UserPlayer* m_user;
-    Player* m_currPlayer;
+    Robot* m_robotLeft = nullptr;
+    Robot* m_robotRight= nullptr;
+    UserPlayer* m_user= nullptr;
+    Player* m_currPlayer= nullptr;
+    Player* m_nextToBet= nullptr;
     Cards m_pendCards;
-    Player* m_pendPlayer;
+    Player* m_pendPlayer= nullptr;
     Cards m_allCards;
     BetRecord m_betRecord;
-    int m_curBet;
+    int m_curBet = 0;
 };
 
 #endif // GAMECONTROL_H

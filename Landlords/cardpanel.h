@@ -11,7 +11,7 @@ public:
     explicit CardPanel(QWidget *parent = nullptr);
 
     //设置图片函数
-    void setImage(QPixmap &front,QPixmap &back);
+    void setImage(const QPixmap &front,const QPixmap &back);
     //获取图片函数
     QPixmap getImage();
 
@@ -24,7 +24,7 @@ public:
     bool isSelected();
 
     //扑克牌的花色和点数
-    void setCard(Card& card);
+    void setCard(const Card& card);
     Card getCard();
 
     //扑克牌的所有者
@@ -42,10 +42,10 @@ signals:
 private:
     QPixmap m_front;
     QPixmap m_back;
-    bool m_isfront;
-    bool m_isSelect;
+    bool m_isfront = true;
+    bool m_isSelect = false;
     Card m_card;
-    Player* m_owner;
+    Player* m_owner = nullptr;
 };
 
 #endif // CARDPANEL_H

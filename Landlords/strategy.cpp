@@ -1,13 +1,13 @@
 #include "strategy.h"
 #include "functional"
 #include <QMap>
-#include <ctime>
 
 
 Strategy::Strategy(Player *player, const Cards &cards)
+    :m_player(player)
+    ,m_cards(cards)
 {
-    m_player = player;
-    m_cards = cards;
+
 }
 
 Cards Strategy::makeStrategy()
@@ -465,7 +465,7 @@ QVector<Cards> Strategy::findCardType(PlayHand hand, bool beat)
     }
 }
 
-void Strategy::pickSeqSingles(QVector<QVector<Cards>> &allSeqRecord,QVector<Cards>&seqSingle,const Cards &cards)
+void Strategy::pickSeqSingles(QVector<QVector<Cards>> &allSeqRecord,const QVector<Cards>&seqSingle,const Cards &cards)
 {
     //1.得到所有顺子的组合
     QVector<Cards> allSeq = Strategy(m_player,cards).findCardType(PlayHand(PlayHand::Hand_Seq_Single,Card::Card_Begin,0),false);

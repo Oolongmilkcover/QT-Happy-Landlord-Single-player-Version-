@@ -37,19 +37,19 @@ void MyButton::mouseReleaseEvent(QMouseEvent *ev)
     QPushButton::mouseReleaseEvent(ev);
 }
 
-void MyButton::enterEvent(QEvent *ev)
+void MyButton::enterEvent(QEvent *)
 {
     m_pixmap.load(m_hover);
     update();
 }
 
-void MyButton::leaveEvent(QEvent *ev)
+void MyButton::leaveEvent(QEvent *)
 {
     m_pixmap.load(m_normal);
     update();
 }
 
-void MyButton::paintEvent(QPaintEvent *ev)
+void MyButton::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.drawPixmap(rect(),m_pixmap);

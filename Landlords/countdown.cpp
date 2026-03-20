@@ -23,7 +23,6 @@ CountDown::CountDown(QWidget *parent)
         }
         update();
     });
-
 }
 
 void CountDown::showCountDown()
@@ -40,7 +39,12 @@ void CountDown::stopCountDown()
     update();
 }
 
-void CountDown::paintEvent(QPaintEvent *ev)
+void CountDown::shutdownTimer()
+{
+    emit stopTimer();
+}
+
+void CountDown::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.drawPixmap(rect(),m_clock);

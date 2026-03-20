@@ -14,6 +14,10 @@ public:
     void preparePlayHand() override;
     void thinkCallLord() override;
     void thinkPlayHand() override;
+
+    void setGameOver(bool flag);
+private:
+    bool m_gameover;
 };
 
 #endif // ROBOT_H

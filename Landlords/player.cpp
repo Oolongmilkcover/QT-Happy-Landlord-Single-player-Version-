@@ -5,8 +5,7 @@
 Player::Player(QObject *parent)
     : QObject{parent}
 {
-    m_score = 0;
-    m_isWin = false;
+
 }
 
 Player::Player(QString name, QObject *parent)
@@ -90,7 +89,7 @@ void Player::grabLordBet(int point)
     emit notifyGrabLordBet(this,point);
 }
 
-void Player::storeDispatchCard(Card &card)
+void Player::storeDispatchCard(const Card &card)
 {
     m_cards.add(card);
     Cards  cs ;
@@ -98,7 +97,7 @@ void Player::storeDispatchCard(Card &card)
     emit notifyPickCards(this,cs);
 }
 
-void Player::storeDispatchCard(Cards &cards)
+void Player::storeDispatchCard(const Cards &cards)
 {
     m_cards.add(cards);
     emit notifyPickCards(this,cards);
@@ -122,7 +121,7 @@ void Player::playHand(Cards &cards)
 
 
 
-void Player::setPendingInfo(Player *player, Cards &cards)
+void Player::setPendingInfo(Player *player, const Cards &cards)
 {
     m_pendPlayer = player;
     m_pendCards = cards;

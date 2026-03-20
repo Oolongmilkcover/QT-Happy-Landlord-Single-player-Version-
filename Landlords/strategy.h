@@ -30,7 +30,7 @@ public:
     QVector<Cards> findCardType(PlayHand hand,bool beat);
 
     //9.从指定的Cards对象中挑选出满足条件的顺子
-    void pickSeqSingles(QVector<QVector<Cards>> &allSeqRecord,QVector<Cards>&seqSingle,const Cards &cards);
+    void pickSeqSingles(QVector<QVector<Cards>> &allSeqRecord,const QVector<Cards>&seqSingle,const Cards &cards);
     //10.最优的顺子的集合的筛选函数
     QVector<Cards> pickOptimalSeqSingles();
 private:

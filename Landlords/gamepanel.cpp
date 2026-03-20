@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QRandomGenerator>
+#include <QSlider>
 
 GamePanel::GamePanel(QWidget *parent)
     : QMainWindow(parent)
@@ -39,7 +40,11 @@ GamePanel::GamePanel(QWidget *parent)
     connect(m_timer,&QTimer::timeout,this,&GamePanel::onDispatchCard);
 
     m_animation = new AnimationWindow(this);
-
+    m_bgm = new BGMControl(this);
+    QSlider *volumeSlider = ui->setvolume->findChild<QSlider*>("verticalSlider");
+    connect(volumeSlider, &QSlider::valueChanged, this, [=](int value) {
+        m_bgm->setVolume(value);
+    });
 }
 
 GamePanel::~GamePanel()
@@ -86,7 +91,7 @@ void GamePanel::initCardMap()
     //3.背景图
     m_cardBackImg = pixmap.copy(2*m_cardSize.width(),4*m_cardSize.height(),m_cardSize.width(),m_cardSize.height());
     //正常花色
-    int i = 0,j;
+    int i = 0,j = 0;
     for(Card::CardSuit suit = Card::Diamond;suit<Card::Suit_End;suit++){
         j = 0;
         for(Card::CardPoint pt=Card::Card_3;pt<Card::Card_SJ;pt++){
@@ -149,7 +154,7 @@ void GamePanel::initPlayContext()
         QRect(250,rect().bottom()-120,width()-500,100)                    //当前玩家
     };
     //2.玩家出牌的区域
-    QRect playHandRect[] = {
+    const QRect playHandRect[] = {
         //x,y,width,heigth
         QRect(260,150,100,100),                                           //左机器人
         QRect(rect().right()-360,150,100,100),                            //右机器人
@@ -224,6 +229,11 @@ void GamePanel::gameStatusPrecess(GameControl::GameStatus status)
     //处理游戏状态
     switch (status) {
     case GameControl::DispatchCard:
+        m_gameCtl->getLeftRobot()->setGameOver(false);
+        m_gameCtl->getRightRobot()->setGameOver(false);
+        //播放背景音乐
+        m_bgm->startBGM();
+
         startDispatchCard();
         break;
     case GameControl::CallingLord:
@@ -294,7 +304,7 @@ void GamePanel::startDispatchCard()
     //启动定时器
     m_timer->start(10); //10毫秒
     //播放背景音乐
-
+    m_bgm->playAssistMusic(BGMControl::Dispatch);
 }
 
 void GamePanel::cardMoveStep(Player* player,int curPos)
@@ -302,7 +312,7 @@ void GamePanel::cardMoveStep(Player* player,int curPos)
     //得到每个玩家扑克牌展示区域
     QRect cardRect = m_contextMap[player].cardRect;
     //每个玩家的单元步长
-    int unit[] = {
+    const int unit[] = {
         (m_baseCardPos.x()-cardRect.right())/100,
         (cardRect.left()-m_baseCardPos.x())/100,
         (cardRect.top()-m_baseCardPos.y())/100
@@ -326,9 +336,10 @@ void GamePanel::cardMoveStep(Player* player,int curPos)
 
 }
 
-void GamePanel::disposCard(Player* player,Cards& cards)
+void GamePanel::disposCard(Player* player,const Cards& cards)
 {
-    CardList list = cards.toCardList();
+    Cards& myCard = const_cast<Cards&>(cards);
+    CardList list = myCard.toCardList();
     for(int i= 0;i<list.size();i++){
         CardPanel* panel = m_cardMap[list[i]];
         panel->setOwner(player);
@@ -414,8 +425,6 @@ void GamePanel::onDispatchCard()
         //给玩家发一张牌
         Card card = m_gameCtl->takeOneCard();
         curPlayer->storeDispatchCard(card);
-        // Cards cs(card);
-        //disposCard(curPlayer,cs);
         //切换玩家
         m_gameCtl->setCurrentPlayer(curPlayer->getNextPlayer());
         curMovePos = 0;
@@ -427,6 +436,8 @@ void GamePanel::onDispatchCard()
             m_timer->stop();
             //切换游戏状态
             gameStatusPrecess(GameControl::CallingLord);
+            //停止发牌音乐
+            m_bgm->stopAssistMusic();
             return ;
         }
     }
@@ -462,15 +473,21 @@ void GamePanel::onPlayStatusChanged(Player *player, GameControl::PlayerStatus st
         }
         break;
     case GameControl::Winning:
+        m_bgm->stopBGM();
         m_contextMap[m_gameCtl->getLeftRobot()].isFrontSide = true;
+        m_gameCtl->getLeftRobot()->setGameOver(true);
         m_contextMap[m_gameCtl->getRightRobot()].isFrontSide = true;
+        m_gameCtl->getRightRobot()->setGameOver(true);
         updatePlayerCards(m_gameCtl->getLeftRobot());
         updatePlayerCards(m_gameCtl->getRightRobot());
         //更新玩家得分
         updatePlayerScore();
         //下一个先抢地主的
-        m_gameCtl->setCurrentPlayer(player);
+        m_gameCtl->setNextToBet(player);
         showEndingScorePanel();
+
+        //关闭倒计时的计时器
+        m_countDown->stopCountDown();
         break;
     }
 }
@@ -487,11 +504,12 @@ void GamePanel::onGrabLordBet(Player *player, int bet, bool flag)
         }else{
             context.info->setPixmap(QPixmap(":/images/qiangdizhu.png"));
         }
+        //显示叫地主的分数
+        showAnimation(Bet,bet);
     }
     context.info->show();
 
-    //显示叫地主的分数
-    showAnimation(Bet,bet);
+    m_bgm->playerRobLordMusic(bet,(BGMControl::RoleSex)player->getSex(),flag);
 }
 
 void GamePanel::onDisposePlayHand(Player *player,Cards &cards)
@@ -519,10 +537,22 @@ void GamePanel::onDisposePlayHand(Player *player,Cards &cards)
     if(cards.isEmpty()){
         it->info->setPixmap(QPixmap(":/images/pass.png"));
         it->info->show();
+        m_bgm->playPassMusic((BGMControl::RoleSex)player->getSex());
+    }else{
+        if(m_gameCtl->getPendPlayer() == player||m_gameCtl->getPendPlayer() == nullptr){
+            m_bgm->playCardMusic(cards,true,(BGMControl::RoleSex)player->getSex());
+        }else{
+            m_bgm->playCardMusic(cards,false,(BGMControl::RoleSex)player->getSex());
+        }
     }
     //3.更新玩家剩余的牌
     updatePlayerCards(player);
     //4.播放提示音乐
+    if(player->getCards().cardCount() == 2){
+        m_bgm->playerLastMusic(BGMControl::Last2,(BGMControl::RoleSex)player->getSex());
+    }else if(player->getCards().cardCount() == 1){
+        m_bgm->playerLastMusic(BGMControl::Last1,(BGMControl::RoleSex)player->getSex());
+    }
 }
 
 void GamePanel::onCardSelected(Qt::MouseButton button)
@@ -535,7 +565,7 @@ void GamePanel::onCardSelected(Qt::MouseButton button)
         return;
     }
     //2.判断是不是自己的牌
-    CardPanel* panel = (CardPanel*)sender();
+    CardPanel* panel = static_cast<CardPanel*>(sender());
     if(panel->getOwner()!=m_gameCtl->getUserPlayer()){
         return;
     }
@@ -553,6 +583,7 @@ void GamePanel::onCardSelected(Qt::MouseButton button)
     }else{
         m_selectCards.erase(it);
     }
+    m_bgm->playAssistMusic(BGMControl::SelectCard);
 }
 
 void GamePanel::onUserPlayHand()
@@ -637,14 +668,25 @@ void GamePanel::showAnimation(AnimationType type, int bet)
 {
     switch(type){
     case AnimationType::Shunzi:
-        break;
     case AnimationType::LianDui:
+        m_animation->setFixedSize(250,150);
+        m_animation->move((width()-m_animation->width())/2,200);
+        m_animation->showSequence((AnimationWindow::Type)type);
         break;
     case AnimationType::Plane:
+        m_animation->setFixedSize(800,75);
+        m_animation->move((width()-m_animation->width())/2,200);
+        m_animation->showPlane();
         break;
     case AnimationType::Bomb:
+        m_animation->setFixedSize(180,200);
+        m_animation->move((width()-m_animation->width())/2,(height()-m_animation->height())/2-70);
+        m_animation->showBomb();
         break;
     case AnimationType::JokerBomb:
+        m_animation->setFixedSize(250,200);
+        m_animation->move((width()-m_animation->width())/2,(height()-m_animation->height())/2-70);
+        m_animation->showJokerBomb();
         break;
     case AnimationType::Bet:
         m_animation->setFixedSize(160,98);
@@ -693,6 +735,11 @@ void GamePanel::showEndingScorePanel()
 {
     bool isLoard =  m_gameCtl->getUserPlayer()->getRole() == Player::Lord ? true:false;
     bool isWin = m_gameCtl->getUserPlayer()->getWin();
+    if(isWin){
+        m_bgm->playEndingMusic(true);
+    }else{
+        m_bgm->playEndingMusic(false);
+    }
     EndingPanel* panel = new EndingPanel(isLoard,isWin,this);
     panel->show();
     panel->move((width()-panel->width())/2,-panel->height());
@@ -724,6 +771,7 @@ void GamePanel::initCountDown()
     m_countDown->move((width()-m_countDown->width())/2,(height()-m_countDown->height())/2+30);
     connect(m_countDown,&CountDown::notMuchTime,this,[=](){
         //播放 播不播不
+        m_bgm->playAssistMusic(BGMControl::Alert);
     });
     connect(m_countDown,&CountDown::timeout,this,&GamePanel::onUserPass);
     UserPlayer* userPlayer = m_gameCtl->getUserPlayer();
@@ -734,7 +782,7 @@ void GamePanel::initCountDown()
     });
 }
 
-void GamePanel::paintEvent(QPaintEvent *ev)
+void GamePanel::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     p.drawPixmap(rect(),m_bkImage);
@@ -758,3 +806,9 @@ void GamePanel::mouseMoveEvent(QMouseEvent *ev)
         }
     }
 }
+
+void GamePanel::on_pushButton_clicked()
+{
+
+}
+

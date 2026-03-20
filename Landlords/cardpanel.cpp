@@ -6,10 +6,9 @@
 CardPanel::CardPanel(QWidget *parent)
     : QWidget{parent}
 {
-    m_isfront = true;
 }
 
-void CardPanel::setImage(QPixmap &front, QPixmap &back)
+void CardPanel::setImage(const QPixmap &front,const QPixmap &back)
 {
     m_front = front;
     m_back = back;
@@ -44,7 +43,7 @@ bool CardPanel::isSelected()
     return m_isSelect;
 }
 
-void CardPanel::setCard(Card &card)
+void CardPanel::setCard(const Card &card)
 {
     m_card = card;
 }
@@ -69,7 +68,7 @@ void CardPanel::clicked()
     emit cardSelected(Qt::LeftButton);
 }
 
-void CardPanel::paintEvent(QPaintEvent *event)
+void CardPanel::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     if(m_isfront){
@@ -82,4 +81,5 @@ void CardPanel::paintEvent(QPaintEvent *event)
 void CardPanel::mousePressEvent(QMouseEvent *event)
 {
     emit cardSelected(event->button());
+    Q_UNUSED(event)
 }

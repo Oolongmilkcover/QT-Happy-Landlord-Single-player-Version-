@@ -9,6 +9,7 @@
 #include <QTimer>
 #include "animationwindow.h"
 #include "countdown.h"
+#include "bgmcontrol.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class GamePanel;
@@ -51,7 +52,7 @@ public:
     //移动扑克牌
     void cardMoveStep(Player* player,int curPos);
     //处理分发得到的扑克牌
-    void disposCard(Player* player,Cards& cards);
+    void disposCard(Player* player,const Cards& cards);
     //更新扑克牌在窗口的显示
     void updatePlayerCards(Player* player);
     //定时器处理动作
@@ -82,6 +83,9 @@ public:
 protected:
     void paintEvent(QPaintEvent* ev);
     void mouseMoveEvent(QMouseEvent* ev);
+private slots:
+    void on_pushButton_clicked();
+
 private:
     enum CardAlign{ Horizontal,Vertical};
     struct PlayerContext{
@@ -121,6 +125,7 @@ private:
     QRect m_cardsRect;
     QHash<CardPanel*,QRect> m_userCards;
     CountDown* m_countDown;
+    BGMControl* m_bgm;
 
 };
 #endif // GAMEPANEL_H

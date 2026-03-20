@@ -47,6 +47,7 @@ void GameControl::playerInit()
 
     // 指定当前玩家
     m_currPlayer = m_user;
+    m_nextToBet = m_user;
 
     // 处理玩家发射出的信号
     connect(m_user, &UserPlayer::notifyGrabLordBet, this, &GameControl::onGrabBet);
@@ -138,8 +139,8 @@ void GameControl::resetCardData()
 
 void GameControl::startLordCard()
 {
-    m_currPlayer->prepareCallLord();
-    emit playerStatusChanged(m_currPlayer,ThinkingForCallLord);
+    m_nextToBet->prepareCallLord();
+    emit playerStatusChanged(m_nextToBet,ThinkingForCallLord);
 }
 
 void GameControl::becomeLord(Player* player,int bet)
@@ -268,6 +269,11 @@ void GameControl::onPlayerHand(Player *player, Cards &cards)
     m_currPlayer = player->getNextPlayer();
     m_currPlayer->preparePlayHand();
     emit playerStatusChanged(m_currPlayer,GameControl::ThinkingForPlayHand);
+}
+
+void GameControl::setNextToBet(Player *player)
+{
+    m_nextToBet = player;
 }
 
 

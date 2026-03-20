@@ -11,9 +11,11 @@ public:
     explicit CountDown(QWidget *parent = nullptr);
     void showCountDown();
     void stopCountDown();
+    void shutdownTimer();
 signals:
     void notMuchTime();
     void timeout();
+    void stopTimer();
 protected:
     void paintEvent(QPaintEvent *ev);
 

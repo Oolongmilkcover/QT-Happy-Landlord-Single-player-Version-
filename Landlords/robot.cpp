@@ -8,6 +8,7 @@ Robot::Robot(QObject *parent)
     : Player{parent}
 {
     m_type = Player::Robot;
+    m_gameover = false;
 }
 
 void Robot::prepareCallLord()
@@ -65,9 +66,9 @@ void Robot::thinkCallLord()
 
     if(weigth>=22){
         grabLordBet(3);
-    }else if(weigth<22&&weigth>=18){
+    }else if(weigth< 22 && weigth>=18){
         grabLordBet(2);
-    }else if(weigth < 18&&weigth>10){
+    }else if(weigth < 18 && weigth>10){
         grabLordBet(1);
     }else{
         grabLordBet(0);
@@ -77,9 +78,17 @@ void Robot::thinkCallLord()
 
 void Robot::thinkPlayHand()
 {
+    if(m_gameover){
+        return;
+    }
     Strategy st(this,m_cards);
     Cards cs = st.makeStrategy();
     playHand(cs);
+}
+
+void Robot::setGameOver(bool flag)
+{
+    m_gameover = flag;
 }
 
 
